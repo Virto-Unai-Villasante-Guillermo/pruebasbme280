@@ -9,10 +9,7 @@
 #include <stdint.h>
 #include "bme280.h"
 
-// delay between samples in microseconds
-#define DELAY 1000000
-// Width of the graph (128 - 40)
-#define WIDTH 88
+
 
 int main(int argc, char *argv[])
 {
@@ -27,7 +24,7 @@ int T, P, H; // calibrated values
 	}
 
 	printf("BME280 device successfully opened.\n");
-	usleep(10000000); // wait for data to settle for first read
+	usleep(1000000); // wait for data to settle for first read
 
 	for (i=0; i<120; i++) // read values twice a second for 1 minute
 	{
