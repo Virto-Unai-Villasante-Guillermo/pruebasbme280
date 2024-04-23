@@ -41,7 +41,7 @@ int main(void) {
     socklen_t len;
     char buffer[BUFFSIZE];
     char str[INET_ADDRSTRLEN];
-    char respuesta[]="12";
+    char respuesta[BUFFSIZE];
     struct sockaddr_in serveraddr, clientaddr;
     int i;
 	int T, P, H; // calibrated values
@@ -77,33 +77,40 @@ int main(void) {
 
     // Start listening:
     while (1) {
+        memset(buffer,'\0',sizeof(buffer));
         //Recibe mensaje
         num = recvfrom(sock, buffer, BUFFSIZE, MSG_WAITALL,
                        (struct sockaddr *)&clientaddr, &len);
+        
         //Lee sensor
         bme280ReadValues(&T, &P, &H);
         
         //Analiza mensaje recibido
         if (strcmp(buffer,"temp")==0) {
-            sprintf(respuesta,"%.2f",(float)T/100.0);
+            //Construye String con valor de temperatura calibrado
+            sprintf(respuesta,"La temperatura es de %.2fºC\n",(float)T/100.0);
             //Manda valor temperatura
             sendto(sock, &respuesta, strlen(respuesta), MSG_CONFIRM,
                (struct sockaddr *)&clientaddr, len);
         }
         else if (strcmp(buffer,"hum")==0) {
-            printf("Humedad\n");
+            sprintf(respuesta,"La humedad relativa es del %.6f%\n",(float)H/1024.0);
+            sendto(sock, &respuesta, strlen(respuesta), MSG_CONFIRM,
+               (struct sockaddr *)&clientaddr, len);
         }
         else if (strcmp(buffer,"press")==0) {
-            printf("Presion\n");
+            sprintf(respuesta,"La presión atmósferica es de %.6fhPa\n",(float)P/256.0);
+            sendto(sock, &respuesta, strlen(respuesta), MSG_CONFIRM,
+               (struct sockaddr *)&clientaddr, len);
         }
-
-        buffer[num] = '\0';
+        else if (strcmp(buffer,"close")==0) {
+            break;
+        }
 
         inet_ntop(AF_INET, &(clientaddr.sin_addr), str, INET_ADDRSTRLEN);
 
         printf("New message from %s:%d -- %s\n", str, ntohs(clientaddr.sin_port), buffer);
-
-        // Send echo back:
+                // Send echo back:
         sendto(sock, &buffer, strlen(buffer), MSG_CONFIRM,
                (struct sockaddr *)&clientaddr, len);
     }
