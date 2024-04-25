@@ -1,0 +1,11 @@
+[Unit]
+Description= Server to retrieve atmospherical parameters from BME280 sensor through commands
+After=multi-user.target
+
+[Service]
+Type=simple
+ExecStart=/home/ADE-MASTER/Desktop/pruebasbme280/prueba2
+Restart=no
+
+[Install]
+WantedBy=multi-user.target
